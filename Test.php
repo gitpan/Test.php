@@ -318,7 +318,7 @@ L<TAP> - The TAP protocol
 
 =head1 AUTHOR
 
-Ævar Arnfjörð Bjarmason <avar@cpan.org>
+E<AElig>var ArnfjE<ouml>rE<eth> Bjarmason <avar@cpan.org>
 
 =head1 LICENSING
 

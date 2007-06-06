@@ -1,0 +1,10 @@
+2007-06-06 Ævar Arnfjörð Bjarmason <avar@cpan.org> (0.02)
+
+	* Test.php: Escape the author name so that it doesn't show up as
+	            gibberish on search.cpan.org
+	* Makefile.PL: New file with a 'test' target appropriate for the
+	               PHP. This replaces the hand-written Makefile
+
+2007-06-06 Ævar Arnfjörð Bjarmason <avar@cpan.org> (0.01)
+
+	* Initial release
