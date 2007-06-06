@@ -1,7 +1,7 @@
 use inc::Module::Install;
 
 name 'Test.php';
-version '0.03';
+version '0.04';
 
 author 'Ævar Arnfjörð Bjarmason <avar@cpan.org>';
 abstract_from 'Test.php';
@@ -19,5 +19,4 @@ test:
 	prove -r t
 
 END
-
 }

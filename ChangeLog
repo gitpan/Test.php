@@ -1,3 +1,8 @@
+2007-06-06 Ævar Arnfjörð Bjarmason <avar@cpan.org> (0.04)
+
+	* Test.php: Note that new versions can be found on CPAN
+	* Test.php: Coding style: func(arg) not func( arg )
+
 2007-06-06 Ævar Arnfjörð Bjarmason <avar@cpan.org> (0.03)
 
 	* META.yml: Forgot to bump this along with the last release

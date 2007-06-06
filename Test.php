@@ -1,67 +1,70 @@
 <?php
 # See the end of this file for documentation
 
+# The latest release of this test framework can always be found on CPAN:
+# http://search.cpan.org/search?query=Test.php
+
 register_shutdown_function('test_ends');
 
 $__Test = array(
-      'run'       => 0,
-      'failed'    => 0,
-      'badpass'   => 0,
-      'planned'   => null
+    'run'       => 0,
+    'failed'    => 0,
+    'badpass'   => 0,
+    'planned'   => null
 );
 
-function plan( $plan, $why = '' )
+function plan($plan, $why = '')
 {
     global $__Test;
 
     $__Test['planned'] = true;
 
-    switch ( $plan )
+    switch ($plan)
     {
-    case 'no_plan':
+      case 'no_plan':
         $__Test['planned'] = false;
         break;
-    case 'skip_all';
-        printf( "1..0%s\n", $why ? " # Skip $why" : '' );
+      case 'skip_all';
+        printf("1..0%s\n", $why ? " # Skip $why" : '');
         exit;
-    default:
-        printf( "1..%d\n", $plan );
+      default:
+        printf("1..%d\n", $plan);
         break;
     }
 }
 
-function pass( $desc = '' )
+function pass($desc = '')
 {
     return proclaim(true, $desc);
 }
 
-function fail( $desc = '' )
+function fail($desc = '')
 {
-    return proclaim( false, $desc );
+    return proclaim(false, $desc);
 }
 
-function ok( $cond, $desc = '' ) {
-    return proclaim( $cond, $desc );
+function ok($cond, $desc = '') {
+    return proclaim($cond, $desc);
 }
 
-function is( $got, $expected, $desc = '' ) {
+function is($got, $expected, $desc = '') {
     $pass = $got == $expected;
-    return proclaim( $pass, $desc, /* todo */ false, $got, $expected );
+    return proclaim($pass, $desc, /* todo */ false, $got, $expected);
 }
 
-function isnt( $got, $expected, $desc = '' ) {
+function isnt($got, $expected, $desc = '') {
     $pass = $got != $expected;
-    return proclaim( $pass, $desc, /* todo */ false, $got, $expected, /* negated */ true );
+    return proclaim($pass, $desc, /* todo */ false, $got, $expected, /* negated */ true);
 }
 
-function like( $got, $expected, $desc = '' ) {
-    $pass = preg_match( $expected, $got );
-    return proclaim( $pass, $desc,  /* todo */ false, $got, $expected );
+function like($got, $expected, $desc = '') {
+    $pass = preg_match($expected, $got);
+    return proclaim($pass, $desc, /* todo */ false, $got, $expected);
 }
 
-function unlike( $got, $expected, $desc = '' ) {
-    $pass = ! preg_match( $expected, $got );
-    return proclaim( $pass, $desc,  /* todo */ false, $got, $expected, /* negated */ true );
+function unlike($got, $expected, $desc = '') {
+    $pass = !preg_match($expected, $got);
+    return proclaim($pass, $desc, /* todo */ false, $got, $expected, /* negated */ true);
 }
 
 function cmp_ok($got, $op, $expected, $desc = '')
@@ -71,40 +74,40 @@ function cmp_ok($got, $op, $expected, $desc = '')
     # See http://www.php.net/manual/en/language.operators.comparison.php
     switch ($op)
     {
-    case '==':
+      case '==':
         $pass = $got == $expected;
         break;
-    case '===':
+      case '===':
         $pass = $got === $expected;
         break;
-    case '!=':
-    case '<>':
+      case '!=':
+      case '<>':
         $pass = $got != $expected;
         break;
-    case '!==':
+      case '!==':
         $pass = $got !== $expected;
         break;
-    case '<':
+      case '<':
         $pass = $got < $expected;
         break;
-    case '>':
+      case '>':
         $pass = $got > $expected;
         break;
-    case '<=':
+      case '<=':
         $pass = $got <= $expected;
         break;
-    case '>=':
+      case '>=':
         $pass = $got >= $expected;
         break;
     default:
-        if ( function_exists( $op ) ) {
-            $pass = $op( $got, $expected );
+        if (function_exists($op)) {
+            $pass = $op($got, $expected);
         } else {
             die("No such operator or function $op\n");
         }
     }
 
-    return proclaim( $pass, $desc, /* todo */ false, $got, "$op $expected" );
+    return proclaim($pass, $desc, /* todo */ false, $got, "$got $op $expected");
 }
 
 function diag($message)
@@ -120,34 +123,34 @@ function diag($message)
     }
 }
 
-function include_ok( $file, $desc = '' )
+function include_ok($file, $desc = '')
 {
     $pass = include $file;
-    return proclaim( $pass, $desc == '' ? "include $file" : $desc );
+    return proclaim($pass, $desc == '' ? "include $file" : $desc);
 }
 
-function require_ok( $file, $desc = '' )
+function require_ok($file, $desc = '')
 {
     $pass = require $file;
-    return proclaim( $pass, $desc == '' ? "require $file" : $desc );
+    return proclaim($pass, $desc == '' ? "require $file" : $desc);
 } 
 
-function is_deeply( $got, $expected, $desc = '' )
+function is_deeply($got, $expected, $desc = '')
 {
     # Hack, this should recursively go over the datastructure and
     # report differences like Test::More does
-    $s_got = serialize( $got );
-    $s_exp = serialize( $expected );
+    $s_got = serialize($got);
+    $s_exp = serialize($expected);
 
     $pass = $s_got == $s_exp;
 
-    proclaim( $pass, $desc, /* todo */ false, $got, $expected );
+    proclaim($pass, $desc, /* todo */ false, $got, $expected);
 }
 
-function isa_ok( $obj, $expected, $desc = '' ) {
-    $name = get_class( $obj );
+function isa_ok($obj, $expected, $desc = '') {
+    $name = get_class($obj);
     $pass = $name == $expected;
-    proclaim( $pass, $desc, /* todo */ false, $name, $expected );
+    proclaim($pass, $desc, /* todo */ false, $name, $expected);
 } 
 
 function proclaim(
@@ -156,7 +159,7 @@ function proclaim(
     $todo = false,
     $got = null,
     $expected = null,
-    $negate = false ) {
+    $negate = false) {
 
     global $__Test;
 
@@ -165,29 +168,29 @@ function proclaim(
     # TODO: force_todo
 
     # Everything after the first # is special, so escape user-supplied messages
-    $desc = str_replace( '#', '\\#', $desc );
-    $desc = str_replace( "\n", '\\n', $desc );
+    $desc = str_replace('#', '\\#', $desc);
+    $desc = str_replace("\n", '\\n', $desc);
 
     $ok = $cond ? "ok" : "not ok";
     $directive = $todo === false ? '' : '# TODO aoeu';
 
-    printf( "%s %d %s%s\n", $ok, $__Test['run'], $desc, $directive );
+    printf("%s %d %s%s\n", $ok, $__Test['run'], $desc, $directive);
 
-    if ( ! $cond ) {
-        report_failure( $desc, $got, $expected, $negate, $todo );
+    if (!$cond) {
+        report_failure($desc, $got, $expected, $negate, $todo);
     }
 
     return $cond;
 }
 
-function report_failure( $desc, $got, $expected, $negate, $todo ) {
+function report_failure($desc, $got, $expected, $negate, $todo) {
     # Every public function in this file calls proclaim which then calls
     # this function, so our culprit is the third item in the stack
     $caller = debug_backtrace();
     $call = $caller['2'];
 
     diag(
-        sprintf( " Failed%stest '%s'\n in %s at line %d\n       got: %s\n  expected: %s",
+        sprintf(" Failed%stest '%s'\n in %s at line %d\n       got: %s\n  expected: %s",
             $todo ? ' TODO ' : ' ',
             $desc,
             $call['file'],
@@ -198,12 +201,12 @@ function report_failure( $desc, $got, $expected, $negate, $todo ) {
     );
 }
 
-function test_ends ()
+function test_ends()
 {
     global $__Test;
 
-    if ( $__Test['planned'] === false ) {
-        printf( "1..%d\n", $__Test['run'] );
+    if (!$__Test['planned']) {
+        printf("1..%d\n", $__Test['run']);
     }
 }
 
@@ -219,41 +222,41 @@ Test.php - TAP test framework for PHP with a L<Test::More>-like interface
     <?php  
     require 'Test.php';
   
-    plan( $num ); # plan $num tests
+    plan($num); # plan $num tests
     # or
-    plan( 'no_plan' ); # We don't know how many
+    plan('no_plan'); # We don't know how many
     # or
-    plan( 'skip_all' ); # Skip all tests
+    plan('skip_all'); # Skip all tests
     # or
-    plan( 'skip_all', $reason ); # Skip all tests with a reason
+    plan('skip_all', $reason); # Skip all tests with a reason
   
-    diag( 'message in test output' ) # Trailing \n not required
+    diag('message in test output') # Trailing \n not required
   
     # $test_name is always optional and should be a short description of
     # the test, e.g. "some_function() returns an integer"
   
     # Various ways to say "ok"
-    ok( $got == $expected, $test_name );
+    ok($got == $expected, $test_name);
   
     # Compare with == and !=
-    is( $got, $expected, $test_name );
-    isnt( $got, $expected, $test_name );
+    is($got, $expected, $test_name);
+    isnt($got, $expected, $test_name);
   
     # Run a preg regex match on some data
-    like( $got, $regex, $test_name );
-    unlike( $got, $regex, $test_name );
+    like($got, $regex, $test_name);
+    unlike($got, $regex, $test_name);
   
     # Compare something with a given comparison operator
-    cmp_ok( $got, '==', $expected, $test_name );
+    cmp_ok($got, '==', $expected, $test_name);
     # Compare something with a comparison function (should return bool)
-    cmp_ok( $got, $func, $expected, $test_name );
+    cmp_ok($got, $func, $expected, $test_name);
   
     # Recursively check datastructures for equalness
-    is_deeply( $got, $expected, $test_name );
+    is_deeply($got, $expected, $test_name);
   
     # Always pass or fail a test under an optional name
-    pass( $test_name );
-    fail( $test_name );
+    pass($test_name);
+    fail($test_name);
     ?>
   
 =head1 DESCRIPTION
@@ -310,7 +313,7 @@ programs know they're dealing with a PHP file.
 =head1 TODO
 
 Needs support for TODO tests, maybe via C<ok(0, "foo # TODO fix
-this")> C<ok(1, "foo", array( 'todo' => 'fix this'))>.
+this")> C<ok(1, "foo", array('todo' => 'fix this'))>.
 
 =head1 SEE ALSO
 
