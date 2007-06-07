@@ -1,7 +1,7 @@
 --- 
 abstract: TAP test framework for PHP with a L<Test::More>-like interface
 author: "\xC3\x86var Arnfj\xC3\xB6r\xC3\xB0 Bjarmason <avar@cpan.org>"
-distribution_type: module
+distribution_type: script
 generated_by: Module::Install version 0.65
 license: unrestricted
 meta-spec: 
@@ -12,4 +12,4 @@ no_index:
   directory: 
     - inc
     - t
-version: 0.06
+version: 0.07
