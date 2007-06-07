@@ -14,6 +14,7 @@ inc/Module/Install/WriteAll.pm
 Makefile.PL
 MANIFEST
 META.yml
+README
 t/0-compile.t
 t/1-plan-1.t
 t/1-plan-no_plan.t

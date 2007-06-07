@@ -3,14 +3,20 @@
 
 require 'Test.php';
 
-plan( 1 );
+plan(3);
 
 class SomeClass {
 	function __construct() { }
 }
 
-$obj = new SomeClass;
+class SomeSubClass extends SomeClass {
+}
 
-isa_ok( $obj, 'SomeClass' );
+$obj = new SomeClass;
+isa_ok($obj, 'SomeClass');
+
+$subobj = new SomeSubClass;
+isa_ok($subobj, 'SomeClass');
+isa_ok($subobj, 'SomeSubClass');
 
 ?>

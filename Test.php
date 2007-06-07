@@ -148,8 +148,7 @@ function is_deeply($got, $expected, $desc = '')
 }
 
 function isa_ok($obj, $expected, $desc = '') {
-    $name = get_class($obj);
-    $pass = $name == $expected;
+    $pass = is_a($obj, $expected);
     proclaim($pass, $desc, /* todo */ false, $name, $expected);
 } 
 

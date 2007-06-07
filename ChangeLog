@@ -1,3 +1,9 @@
+2007-06-07 Ævar Arnfjörð Bjarmason <avar@cpan.org> (0.06)
+
+	* Test.php: Patch from #27487 by ANDYA, isa_ok() now handles subclasses
+	* t/isa_ok.t: Test for the #27487 fix
+	* README: New file, this is just pod2text Test.php | iconv -f iso-8859-1 -t utf-8
+
 2007-06-07 Ævar Arnfjörð Bjarmason <avar@cpan.org> (0.05)
 
 	* Makefile.PL: Add requires_external_bin 'php'
