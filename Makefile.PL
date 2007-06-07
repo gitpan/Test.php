@@ -1,11 +1,13 @@
 use inc::Module::Install;
 
 name 'Test.php';
-version '0.04';
+version '0.05';
 
 author 'Ævar Arnfjörð Bjarmason <avar@cpan.org>';
 abstract_from 'Test.php';
 license 'unrestricted';
+
+requires_external_bin 'php';
 
 auto_install;
 WriteAll;

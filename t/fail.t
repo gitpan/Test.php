@@ -5,6 +5,11 @@ require 'Test.php';
 
 plan( 1 );
 
-fail( 'This dummy test failed' );
+if (!getenv("TEST_FAIL")) {
+    diag("Set TEST_FAIL for failing tests");
+    pass("phony");
+} else {
+    fail('This dummy test failed');
+}
 
 ?>
