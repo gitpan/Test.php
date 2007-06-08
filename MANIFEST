@@ -20,6 +20,7 @@ t/1-plan-1.t
 t/1-plan-no_plan.t
 t/1-plan-skip_all-why.t
 t/1-plan-skip_all.t
+t/cmp-deeply.t
 t/cmp_ok-fail.t
 t/cmp_ok.t
 t/diag.t

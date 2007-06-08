@@ -4,7 +4,7 @@
 # The latest release of this test framework can always be found on CPAN:
 # http://search.cpan.org/search?query=Test.php
 
-register_shutdown_function('test_ends');
+register_shutdown_function('_test_ends');
 
 $__Test = array(
     'run'       => 0,
@@ -35,36 +35,36 @@ function plan($plan, $why = '')
 
 function pass($desc = '')
 {
-    return proclaim(true, $desc);
+    return _proclaim(true, $desc);
 }
 
 function fail($desc = '')
 {
-    return proclaim(false, $desc);
+    return _proclaim(false, $desc);
 }
 
 function ok($cond, $desc = '') {
-    return proclaim($cond, $desc);
+    return _proclaim($cond, $desc);
 }
 
 function is($got, $expected, $desc = '') {
     $pass = $got == $expected;
-    return proclaim($pass, $desc, /* todo */ false, $got, $expected);
+    return _proclaim($pass, $desc, /* todo */ false, $got, $expected);
 }
 
 function isnt($got, $expected, $desc = '') {
     $pass = $got != $expected;
-    return proclaim($pass, $desc, /* todo */ false, $got, $expected, /* negated */ true);
+    return _proclaim($pass, $desc, /* todo */ false, $got, $expected, /* negated */ true);
 }
 
 function like($got, $expected, $desc = '') {
     $pass = preg_match($expected, $got);
-    return proclaim($pass, $desc, /* todo */ false, $got, $expected);
+    return _proclaim($pass, $desc, /* todo */ false, $got, $expected);
 }
 
 function unlike($got, $expected, $desc = '') {
     $pass = !preg_match($expected, $got);
-    return proclaim($pass, $desc, /* todo */ false, $got, $expected, /* negated */ true);
+    return _proclaim($pass, $desc, /* todo */ false, $got, $expected, /* negated */ true);
 }
 
 function cmp_ok($got, $op, $expected, $desc = '')
@@ -107,7 +107,7 @@ function cmp_ok($got, $op, $expected, $desc = '')
         }
     }
 
-    return proclaim($pass, $desc, /* todo */ false, $got, "$got $op $expected");
+    return _proclaim($pass, $desc, /* todo */ false, $got, "$got $op $expected");
 }
 
 function diag($message)
@@ -126,33 +126,40 @@ function diag($message)
 function include_ok($file, $desc = '')
 {
     $pass = include $file;
-    return proclaim($pass, $desc == '' ? "include $file" : $desc);
+    return _proclaim($pass, $desc == '' ? "include $file" : $desc);
 }
 
 function require_ok($file, $desc = '')
 {
     $pass = require $file;
-    return proclaim($pass, $desc == '' ? "require $file" : $desc);
+    return _proclaim($pass, $desc == '' ? "require $file" : $desc);
 } 
 
 function is_deeply($got, $expected, $desc = '')
 {
-    # Hack, this should recursively go over the datastructure and
-    # report differences like Test::More does
-    $s_got = serialize($got);
-    $s_exp = serialize($expected);
+    $diff = _cmp_deeply($got, $expected);
+    $pass = is_null($diff);
 
-    $pass = $s_got == $s_exp;
+    if (!$pass) {
+        $got      = strlen($diff['gpath']) ? ($diff['gpath'] . ' = ' . $diff['got']) 
+                                           : _repl($got);
+        $expected = strlen($diff['epath']) ? ($diff['epath'] . ' = ' . $diff['expected']) 
+                                           : _repl($expected);
+    }
 
-    proclaim($pass, $desc, /* todo */ false, $got, $expected);
+    _proclaim($pass, $desc, /* todo */ false, $got, $expected);
 }
 
 function isa_ok($obj, $expected, $desc = '') {
     $pass = is_a($obj, $expected);
-    proclaim($pass, $desc, /* todo */ false, $name, $expected);
-} 
+    _proclaim($pass, $desc, /* todo */ false, $name, $expected);
+}
 
-function proclaim(
+#
+# The code below consists of private utility functions for the above functions
+#
+
+function _proclaim(
     $cond, # bool
     $desc = '',
     $todo = false,
@@ -175,37 +182,145 @@ function proclaim(
 
     printf("%s %d %s%s\n", $ok, $__Test['run'], $desc, $directive);
 
+    # report a failure
     if (!$cond) {
-        report_failure($desc, $got, $expected, $negate, $todo);
+        # Every public function in this file calls _proclaim so our culprit is
+        # the second item in the stack
+        $caller = debug_backtrace();
+        $call = $caller['1'];
+    
+        diag(
+            sprintf(" Failed%stest '%s'\n in %s at line %d\n       got: %s\n  expected: %s",
+                $todo ? ' TODO ' : ' ',
+                $desc,
+                $call['file'],
+                $call['line'],
+                $got,
+                $expected
+            )
+        );
     }
 
     return $cond;
 }
 
-function report_failure($desc, $got, $expected, $negate, $todo) {
-    # Every public function in this file calls proclaim which then calls
-    # this function, so our culprit is the third item in the stack
-    $caller = debug_backtrace();
-    $call = $caller['2'];
-
-    diag(
-        sprintf(" Failed%stest '%s'\n in %s at line %d\n       got: %s\n  expected: %s",
-            $todo ? ' TODO ' : ' ',
-            $desc,
-            $call['file'],
-            $call['line'],
-            $got,
-            $expected
-        )
-    );
-}
-
-function test_ends()
+function _test_ends()
 {
     global $__Test;
 
     if (!$__Test['planned']) {
         printf("1..%d\n", $__Test['run']);
+    }
+}
+
+#
+# All of the below is for is_deeply()
+#
+
+function _repl($obj, $deep = true) {
+    if (is_string($obj)) {
+        return "'" . $obj . "'";
+    } else if (is_numeric($obj)) {
+        return $obj;
+    } else if (is_null($obj)) {
+        return 'null';
+    } else if (is_bool($obj)) {
+        return $obj ? 'true' : 'false';
+    } else if (is_array($obj)) {
+        return _repl_array($obj, $deep);
+    }else {
+        return gettype($obj);
+    }
+}
+
+function _diff($gpath, $got, $epath, $expected) {
+    return array(
+        'gpath'     => $gpath,
+        'got'       => $got,
+        'epath'     => $epath,
+        'expected'  => $expected
+    );
+}
+
+function _idx($obj, $path = '') {
+    return $path . '[' . _repl($obj) . ']';
+}
+
+function _cmp_deeply($got, $exp, $path = '') {
+    if (is_array($exp)) {
+        
+        if (!is_array($got)) {
+            return _diff($path, _repl($got), $path, _repl($exp));
+        }
+        
+        $gk = array_keys($got);
+        $ek = array_keys($exp);
+        $mc = max(count($gk), count($ek));
+
+        for ($el = 0; $el < $mc; $el++) {
+            # One array shorter than the other?
+            if ($el >= count($ek)) {
+                return _diff(_idx($gk[$el], $path), _repl($got[$gk[$el]]), 
+                             'missing', 'nothing');
+            } else if ($el >= count($gk)) {
+                return _diff('missing', 'nothing', 
+                             _idx($ek[$el], $path), _repl($exp[$ek[$el]]));
+            }
+            
+            # Keys differ?
+            if ($gk[$el] != $ek[$el]) {
+                return _diff(_idx($gk[$el], $path), _repl($got[$gk[$el]]), 
+                             _idx($ek[$el], $path), _repl($exp[$ek[$el]]));
+            }
+
+            # Recurse
+            $rc = _cmp_deeply($got[$gk[$el]], $exp[$ek[$el]], _idx($gk[$el], $path));
+            if (!is_null($rc)) {
+                return $rc;
+            }
+        }
+    }
+    else {
+        # Default to serialize hack
+        if (serialize($got) != serialize($exp)) {
+            return _diff($path, _repl($got), $path, _repl($exp));
+        }
+    }
+    
+    return null;
+}
+
+function _plural($n, $singular, $plural = null) {
+    if (is_null($plural)) {
+        $plural = $singular . 's';
+    }
+    return $n == 1 ? "$n $singular" : "$n $plural";
+}
+
+function _repl_array($obj, $deep) {
+    if ($deep) {
+        $slice = array_slice($obj, 0, 3); # Increase from 3 to show more
+        $repl  = array();
+        $next  = 0;
+        foreach ($slice as $idx => $el) {
+            $elrep = _repl($el, false);
+            if (is_numeric($idx) && $next == $idx) {
+                // Numeric index
+                $next++;
+            } else {
+                // Out of sequence or non-numeric
+                $elrep = _repl($idx, false) . ' => ' . $elrep;
+            }
+            $repl[] = $elrep;
+        }
+        $more = count($obj) - count($slice);
+        if ($more > 0) {
+            $repl[] = '... ' . _plural($more, 'more element')  . ' ...';
+        }
+        return 'array(' . join(', ', $repl) . ')';
+    }
+    else {
+        return 'array(' . count($obj) . ')';
     }
 }
 
@@ -320,7 +435,7 @@ L<TAP> - The TAP protocol
 
 =head1 AUTHOR
 
-E<AElig>var ArnfjE<ouml>rE<eth> Bjarmason <avar@cpan.org>
+E<AElig>var ArnfjE<ouml>rE<eth> Bjarmason <avar@cpan.org> and Andy Armstrong <andy@hexten.net>
 
 =head1 LICENSING
 
