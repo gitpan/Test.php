@@ -99,7 +99,8 @@ SEE ALSO
     TAP - The TAP protocol
 
 AUTHOR
-    Ævar Arnfjörð Bjarmason <avar@cpan.org>
+    Ævar Arnfjörð Bjarmason <avar@cpan.org> and Andy Armstrong
+    <andy@hexten.net>
 
 LICENSING
     The author or authors of this code dedicate any and all copyright

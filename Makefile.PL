@@ -1,7 +1,7 @@
 use inc::Module::Install;
 
 name 'Test.php';
-version '0.08';
+version '0.09';
 
 author 'Ævar Arnfjörð Bjarmason <avar@cpan.org>';
 abstract_from 'Test.php';
