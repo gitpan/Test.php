@@ -35,5 +35,6 @@ t/like.t
 t/ok.t
 t/pass.t
 t/require_ok.t
+t/todo.t
 t/unlike.t
 Test.php

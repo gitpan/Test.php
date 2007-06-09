@@ -7,10 +7,15 @@
 register_shutdown_function('_test_ends');
 
 $__Test = array(
-    'run'       => 0,
-    'failed'    => 0,
-    'badpass'   => 0,
-    'planned'   => null
+    # How many tests are planned
+    'planned'   => null,
+
+    # How many tests we've run, if 'planned' is still null by the time we're
+    # done we report the total count at the end
+    'run' => 0,
+
+    # Are are we currently within todo_start()/todo_end() ?
+    'todo' => false,
 );
 
 function plan($plan, $why = '')
@@ -150,9 +155,24 @@ function is_deeply($got, $expected, $desc = '')
     _proclaim($pass, $desc, /* todo */ false, $got, $expected);
 }
 
-function isa_ok($obj, $expected, $desc = '') {
+function isa_ok($obj, $expected, $desc = '')
+{
     $pass = is_a($obj, $expected);
     _proclaim($pass, $desc, /* todo */ false, $name, $expected);
+}
+
+function todo_start()
+{
+    global $__Test;
+
+    $__Test['todo'] = true;
+}
+
+function todo_end()
+{
+    global $__Test;
+
+    $__Test['todo'] = false;
 }
 
 #
@@ -171,14 +191,18 @@ function _proclaim(
 
     $__Test['run'] += 1;
 
-    # TODO: force_todo
+    # We're in a TODO block via todo_start()/todo_end(). TODO via specific
+    # functions is currently unimplemented and will probably stay that way
+    if ($__Test['todo']) {
+        $todo = true;
+    }
 
     # Everything after the first # is special, so escape user-supplied messages
     $desc = str_replace('#', '\\#', $desc);
     $desc = str_replace("\n", '\\n', $desc);
 
     $ok = $cond ? "ok" : "not ok";
-    $directive = $todo === false ? '' : '# TODO aoeu';
+    $directive = $todo === true ? " # TODO $desc" : '';
 
     printf("%s %d %s%s\n", $ok, $__Test['run'], $desc, $directive);
 
@@ -371,6 +395,13 @@ Test.php - TAP test framework for PHP with a L<Test::More>-like interface
     # Always pass or fail a test under an optional name
     pass($test_name);
     fail($test_name);
+
+    # TODO tests, these are expected to fail but won't fail the test run,
+    # unexpected success will be reported
+    todo_start();
+    ok(1 == 2);
+    is("foo", "bar");
+    todo_end();
     ?>
   
 =head1 DESCRIPTION
@@ -424,11 +455,6 @@ programs know they're dealing with a PHP file.
     pass('This dummy test passed');
     ?>
     
-=head1 TODO
-
-Needs support for TODO tests, maybe via C<ok(0, "foo # TODO fix
-this")> C<ok(1, "foo", array('todo' => 'fix this'))>.
-
 =head1 SEE ALSO
 
 L<TAP> - The TAP protocol
