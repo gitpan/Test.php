@@ -3,14 +3,20 @@
 
 require 'Test.php';
 
-plan(6);
+plan(8);
 
 ok(1);
 ok(2);
 
-todo_start();
-ok(0, "oh noes todo");
+todo_start("oh noes todo");
+ok(0);
 is("foo", "bar");
+{
+    todo_start("oh noes another todo");
+    ok(!!0);
+    is("eek", "ook");
+    todo_end();
+}
 todo_end();
 
 ok(3);

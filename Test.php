@@ -15,7 +15,7 @@ $__Test = array(
     'run' => 0,
 
     # Are are we currently within todo_start()/todo_end() ?
-    'todo' => false,
+    'todo' => array(),
 );
 
 function plan($plan, $why = '')
@@ -161,18 +161,22 @@ function isa_ok($obj, $expected, $desc = '')
     _proclaim($pass, $desc, /* todo */ false, $name, $expected);
 }
 
-function todo_start()
+function todo_start($why = '')
 {
     global $__Test;
 
-    $__Test['todo'] = true;
+    $__Test['todo'][] = $why;
 }
 
 function todo_end()
 {
     global $__Test;
 
-    $__Test['todo'] = false;
+    if (count($__Test['todo']) == 0) {
+        die("todo_end() called without a matching todo_start() call");
+    } else {
+        array_pop($__Test['todo']);
+    }
 }
 
 #
@@ -193,7 +197,7 @@ function _proclaim(
 
     # We're in a TODO block via todo_start()/todo_end(). TODO via specific
     # functions is currently unimplemented and will probably stay that way
-    if ($__Test['todo']) {
+    if (count($__Test['todo'])) {
         $todo = true;
     }
 
@@ -202,7 +206,12 @@ function _proclaim(
     $desc = str_replace("\n", '\\n', $desc);
 
     $ok = $cond ? "ok" : "not ok";
-    $directive = $todo === true ? " # TODO $desc" : '';
+    $directive = '';
+
+    if ($todo) {
+        $todo_idx = count($__Test['todo']) - 1;
+        $directive .= ' # TODO ' . $__Test['todo'][$todo_idx];
+    }
 
     printf("%s %d %s%s\n", $ok, $__Test['run'], $desc, $directive);
 
@@ -231,6 +240,11 @@ function _proclaim(
 function _test_ends()
 {
     global $__Test;
+
+    if (count($__Test['todo']) != 0) {
+        $todos = join("', '", $__Test['todo']);
+        die("Missing todo_end() for '$todos'");
+    }
 
     if (!$__Test['planned']) {
         printf("1..%d\n", $__Test['run']);
@@ -398,9 +412,14 @@ Test.php - TAP test framework for PHP with a L<Test::More>-like interface
 
     # TODO tests, these are expected to fail but won't fail the test run,
     # unexpected success will be reported
-    todo_start();
-    ok(1 == 2);
-    is("foo", "bar");
+    todo_start("integer arithmetic still working");
+    ok(1 + 2 == 3);
+    {
+        # TODOs can be nested
+        todo_start("string comparison still working")
+        is("foo", "bar");
+        todo_end();
+    }
     todo_end();
     ?>
   
