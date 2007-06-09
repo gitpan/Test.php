@@ -41,6 +41,18 @@ SYNOPSIS
         # Always pass or fail a test under an optional name
         pass($test_name);
         fail($test_name);
+
+        # TODO tests, these are expected to fail but won't fail the test run,
+        # unexpected success will be reported
+        todo_start("integer arithmetic still working");
+        ok(1 + 2 == 3);
+        {
+            # TODOs can be nested
+            todo_start("string comparison still working")
+            is("foo", "bar");
+            todo_end();
+        }
+        todo_end();
         ?>
   
 DESCRIPTION
@@ -91,10 +103,6 @@ HOWTO
         pass('This dummy test passed');
         ?>
     
-TODO
-    Needs support for TODO tests, maybe via "ok(0, "foo # TODO fix this")"
-    "ok(1, "foo", array('todo' =" 'fix this'))>.
-
 SEE ALSO
     TAP - The TAP protocol
 
